@@ -1,19 +1,11 @@
-#from __future__ import division
+from __future__ import division
 
 import re
 import pprint
 
 my_input = ''
 my_list = []
-listx = []
-listy = []
 
-listx1 = []
-listy1 = []
-
-finalvertexlist = []
-
-intersectionlist = []
 vertexkeylist = []
 vertexvaluelist = []
 street = dict()
@@ -81,15 +73,128 @@ def intersect(l1, l2):
     else:
         return None
 
+
+def vertex():
+    finalvertexlist = []
+    intersectionlist = []
+
+    listx = []
+    listy = []
+
+    listx1 = []
+    listy1 = []
+
+    for k in range(len(key) - 1):
+        vertex = street[key[k]]  # vertex = list of items
+        # print vertex
+        for points in vertex:
+            # print points
+            val = re.split("\,", points)
+            # print val
+            coordx = val[0]
+            # print coordx
+            # coordx = re.split("\(", val[0])
+            # coordx.pop(0)
+            coordy = re.split("\)", val[1])
+            coordy.pop(1)
+            listx.append(coordx)
+            listy.append(coordy[0])
+        # print listx
+        # print listy
+        for k1 in range(k + 1, len(key)):
+            vertex1 = street[key[k1]]  # vertex = list of items
+            # print vertex1
+            for point1 in vertex1:
+                # print point1
+                val1 = re.split("\,", point1)
+                # coordx1 = re.split("\(", val1[0])
+                # coordx1.pop(0)
+                coordx1 = val1[0]
+                # print coordx1
+                coordy1 = re.split("\)", val1[1])
+                coordy1.pop(1)
+                # print coordx1[0]
+                # print coordy1[0]
+                listx1.append(coordx1)
+                listy1.append(coordy1[0])
+            # print listx1
+            # print listy1
+
+            for i in range(len(listx) - 1):
+                P1 = Point(listx[i], listy[i])
+                P2 = Point(listx[i + 1], listy[i + 1])
+                L1 = Line(P1, P2)
+                # print L1
+                # print len(key)
+
+                for j in range(len(listx1) - 1):
+                    P3 = Point(listx1[j], listy1[j])
+                    P4 = Point(listx1[j + 1], listy1[j + 1])
+                    L2 = Line(P3, P4)
+                    # print L2
+
+                    try:
+                        result = intersect(L1, L2)
+                        # print result
+
+                        if result != None:
+                            intersectionlist.append(str(result))
+
+                            finalvertexlist.append(str(result))
+                            finalvertexlist.append(str(P1))
+                            finalvertexlist.append(str(P2))
+                            finalvertexlist.append(str(P3))
+                            finalvertexlist.append(str(P4))
+                            # print finalvertexlist
+
+                    except:
+                        pass
+                        # print "no intersection"
+            listx1 = []
+            listy1 = []
+        listx = []
+        listy = []  # l1 = Line(Point(coordx[0], coordy[0]), Point(coordx[1],coordy[1]))
+    # print finalvertexlist
+    variable = set(finalvertexlist)
+    # print variable
+    V = dict()
+    print "V - "
+    w = 1
+    for z in variable:
+        V.update({w: z}, )
+        w = w + 1
+    pprint.pprint(V)
+
+    vertexvaluelist = V.values()
+    # print vertexvaluelist
+    vertexkeylist = V.keys()
+    # print vertexkeylist
+    var = list(set(intersectionlist))
+    # print var
+    print "E = { "
+    for a in range(len(vertexkeylist)):
+        for b in range(a + 1, len(vertexkeylist)):
+            for c in range(len(var)):
+                if (var[c] == V[vertexkeylist[a]]) or (var[c] == V[vertexkeylist[b]]):
+                    # print vertexkeylist[a]
+                    # print vertexkeylist[b]
+                    # print "condition 1 satisfied"
+                    # print "           "
+                    print '<', vertexkeylist[a], ',', vertexkeylist[b], '>', ','
+    print "}"
+
+    intersectionlist = []
+    finalvertexlist = []
+
+
 while True:
 
     command = raw_input()
-    pattern = re.compile(r'((^([acg]\ ))\"([a-zA-Z\ ]+)\"(\ \([+-?\d\,]+\))+)$')
+    pattern = re.compile(r'((^([acg]\ ))\"([a-zA-Z\ ]+)\"([\ \([+-?\d\,]+\))+)$')
     pattern1 = re.compile(r'((^([r]\ ))\"([a-zA-Z\ ]+)\")')
-    pattern2 = re.compile(r'((^([cg]\ ))\"([a-zA-Z\ ]+)\"(\ \([+-?\d\,]+\))+)$')
+
     matches = pattern.match(command)
     matches1 = pattern1.match(command)
-    matches2 = pattern2.match(command)
 
     if matches:
         my_input = my_input + " " + command
@@ -99,17 +204,45 @@ while True:
     elif matches1:
         command1 = raw_input()
         if command1 == 'g':
-            print "remove street"
+            # print my_list
+            for items in my_list:
+                value = re.split("\"", items)
+                # print value[1]
+                # streetname.append(value[1])
 
-    elif matches2:
-        command2 = raw_input()
-        if command2 == 'g':
-            print "change street"
+                value1 = re.split("\(", value[2])
+                value1.pop(0)
+                # print value1
+
+                street.update({value[1]: value1})
+
+            my_list.append(command)
+            # print my_list
+            # print "remove street"
+            n = len(my_list)
+            m = my_list[n - 1]
+
+            valuez = re.split("\"", m)
+            removekey = valuez[1]
+            # print removekey
+
+            # pprint.pprint(street)
+            key = street.keys()
+            # print key
+            for kk in key:
+                if kk == removekey:
+                    street.update({kk: []})
+                    # pprint.pprint(street)
+                    key = street.keys()
+                    vertex()
+
+
 
 
     elif command == "g":
         # print "execute split function"
         # print my_input
+
         # print my_list
 
         for items in my_list:
@@ -117,113 +250,16 @@ while True:
             # print value[1]
             # streetname.append(value[1])
 
-            value1 = re.split(" ", value[2])
+            value1 = re.split("\(", value[2])
             value1.pop(0)
             # print value1
 
             street.update({value[1]: value1})  # value1 = [listtsss] value[1] = streetname weber sheber etc
 
-        #pprint.pprint(street)
+        # pprint.pprint(street)
         key = street.keys()
         # print key
-
-        for k in range(len(key) - 1):
-            vertex = street[key[k]]  # vertex = list of items
-            # print vertex
-            for points in vertex:
-                # print points
-                val = re.split("\,", points)
-                coordx = re.split("\(", val[0])
-                coordx.pop(0)
-                coordy = re.split("\)", val[1])
-                coordy.pop(1)
-                listx.append(coordx[0])
-                listy.append(coordy[0])
-            #print listx
-            #print listy
-            for k1 in range(k + 1, len(key)):
-                vertex1 = street[key[k1]]  # vertex = list of items
-                # print vertex1
-                for point1 in vertex1:
-                    # print point1
-                    val1 = re.split("\,", point1)
-                    coordx1 = re.split("\(", val1[0])
-                    coordx1.pop(0)
-                    coordy1 = re.split("\)", val1[1])
-                    coordy1.pop(1)
-                    # print coordx1[0]
-                    # print coordy1[0]
-                    listx1.append(coordx1[0])
-                    listy1.append(coordy1[0])
-                #print listx1
-                #print listy1
-
-                for i in range(len(listx) - 1):
-                    P1 = Point(listx[i], listy[i])
-                    P2 = Point(listx[i + 1], listy[i + 1])
-                    L1 = Line(P1, P2)
-                    #print L1
-                    #print len(key)
-
-                    for j in range(len(listx1) - 1):
-                        P3 = Point(listx1[j], listy1[j])
-                        P4 = Point(listx1[j + 1], listy1[j + 1])
-                        L2 = Line(P3, P4)
-                        #print L2
-
-                        try:
-                            result = intersect(L1, L2)
-                            #print result
-
-                            if result != None:
-                                intersectionlist.append(str(result))
-
-                                finalvertexlist.append(str(result))
-                                finalvertexlist.append(str(P1))
-                                finalvertexlist.append(str(P2))
-                                finalvertexlist.append(str(P3))
-                                finalvertexlist.append(str(P4))
-                                # print finalvertexlist
-
-                        except:
-                            pass
-                            #print "no intersection"
-
-                listx1 = []
-                listy1 = []
-            listx = []
-            listy = []  # l1 = Line(Point(coordx[0], coordy[0]), Point(coordx[1],coordy[1]))
-        #print finalvertexlist
-        variable = set(finalvertexlist)
-        # print variable
-        V = dict()
-        print "V - "
-        w = 1
-        for z in variable:
-            V.update({w: z}, )
-            w = w + 1
-        pprint.pprint(V)
-
-        vertexvaluelist = V.values()
-        #print vertexvaluelist
-        vertexkeylist = V.keys()
-        #print vertexkeylist
-        var = list(set(intersectionlist))
-        #print var
-        print "E - "
-        for a in range(len(vertexkeylist) - 1):
-            for b in range(a + 1, len(vertexkeylist) - 1):
-                for c in range(len(var)):
-                    if (var[c] == V[vertexkeylist[a]]) or (var[c] == V[vertexkeylist[b]]):
-                        #print vertexkeylist[a]
-                        #print vertexkeylist[b]
-                        #print "condition 1 satisfied"
-                        #print "           "
-                        print '<',vertexkeylist[a],',',vertexkeylist[b],'>'
-
+        vertex()
 
     else:
         print "Error: Invalid format provided"
-
-
-
